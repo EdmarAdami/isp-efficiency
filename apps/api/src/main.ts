@@ -5,6 +5,8 @@ import { AuditController } from './audits/audit.controller';
 import { AuditService } from './audits/audit.service';
 import { IngestController } from './audits/ingest.controller';
 import { IngestService } from './audits/ingest.service';
+import { ReprocessController } from './audits/reprocess.controller';
+import { ReprocessService } from './audits/reprocess.service';
 import { demoAudit } from './rules/audit';
 import { detectExcessiveTransfers } from './rules/quality';
 
@@ -17,7 +19,7 @@ import { detectExcessiveTransfers } from './rules/quality';
     ]) };
   }
 }
-@Module({ controllers: [ApiController, AuditController, IngestController], providers: [AuditService, IngestService] }) class AppModule {}
+@Module({ controllers: [ApiController, AuditController, IngestController, ReprocessController], providers: [AuditService, IngestService, ReprocessService] }) class AppModule {}
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   app.enableCors({ origin: process.env.WEB_ORIGIN || 'http://localhost:3000' });
