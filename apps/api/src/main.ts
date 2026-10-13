@@ -22,6 +22,7 @@ import { detectExcessiveTransfers } from './rules/quality';
 @Module({ controllers: [ApiController, AuditController, IngestController, ReprocessController], providers: [AuditService, IngestService, ReprocessService] }) class AppModule {}
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
+  app.enableShutdownHooks();
   app.enableCors({ origin: process.env.WEB_ORIGIN || 'http://localhost:3000' });
   await app.listen(Number(process.env.PORT || 3001));
 }

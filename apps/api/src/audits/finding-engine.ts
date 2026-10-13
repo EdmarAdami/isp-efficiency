@@ -1,8 +1,9 @@
 import { createHash } from 'node:crypto';
+import type { Prisma } from '@prisma/client';
 import type { Interaction } from '../rules/audit';
 import { detectRecontacts } from '../rules/audit';
 import { detectExcessiveTransfers } from '../rules/quality';
-export type PersistableFinding = { tenantId:string; journeyId:string; ruleCode:string; fingerprint:string; estimatedCostCents:number; evidence:Record<string,unknown> };
+export type PersistableFinding = { tenantId:string; journeyId:string; ruleCode:string; fingerprint:string; estimatedCostCents:number; evidence:Prisma.InputJsonObject };
 export function buildFindings(interactions: Interaction[]): PersistableFinding[] {
   const source = [...detectRecontacts(interactions),...detectExcessiveTransfers(interactions)];
   return source.map(f=>{
