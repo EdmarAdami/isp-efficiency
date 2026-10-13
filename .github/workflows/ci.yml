@@ -1,0 +1,36 @@
+name: MVP CI
+on:
+  push:
+    branches: [main, feat/mvp-foundation]
+  pull_request:
+jobs:
+  checks:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: npm ci
+      - run: npm run test -w @isp/api
+      - run: npm run db:generate -w @isp/db
+        env:
+          DATABASE_URL: postgresql://isp:dummy@localhost:5432/isp_efficiency
+      - run: npm run build -w @isp/api
+      - run: npx tsx --test apps/web/lib/local-auth.test.ts
+      - run: npm run build -w @isp/web
+      - run: npx prisma validate --schema packages/db/prisma/schema.prisma
+        env:
+          DATABASE_URL: postgresql://isp:dummy@localhost:5432/isp_efficiency
+
+  docker:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: python3 scripts/init-docker-env.py
+      - run: python3 scripts/configure-local-login.py --generate
+      - run: docker compose --env-file .env.docker -f compose.production.yml up --build -d --wait
+      - run: docker compose --env-file .env.docker -f compose.production.yml exec -T web node < scripts/smoke.cjs
+      - run: python3 scripts/test-local-login.py --url http://localhost:3000
+      - if: always()
+        run: docker compose --env-file .env.docker -f compose.production.yml down

@@ -1,0 +1,74 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Tenant {
+  id           String        @id @default(uuid())
+  name         String
+  createdAt    DateTime      @default(now())
+  customers    Customer[]
+  interactions Interaction[]
+  rules        AuditRule[]
+  findings     Finding[]
+}
+
+model Customer {
+  id           String        @id @default(uuid())
+  tenantId     String
+  externalRef  String
+  tenant       Tenant        @relation(fields: [tenantId], references: [id])
+  interactions Interaction[]
+
+  @@unique([tenantId, externalRef])
+  @@index([tenantId])
+}
+
+model Interaction {
+  externalId  String?
+  id          String   @id @default(uuid())
+  tenantId    String
+  customerId  String
+  journeyId   String
+  occurredAt  DateTime
+  reason      String
+  channel     String
+  costCents   Int      @default(0)
+  transfers   Int      @default(0)
+  tenant      Tenant   @relation(fields: [tenantId], references: [id])
+  customer    Customer @relation(fields: [customerId], references: [id])
+
+  @@unique([tenantId, externalId])
+  @@index([tenantId, journeyId, occurredAt])
+}
+
+model AuditRule {
+  id            String  @id @default(uuid())
+  tenantId      String
+  code          String
+  version       Int     @default(1)
+  enabled       Boolean @default(true)
+  configuration Json
+  tenant        Tenant  @relation(fields: [tenantId], references: [id])
+
+  @@unique([tenantId, code, version])
+}
+
+model Finding {
+  id                 String   @id @default(uuid())
+  tenantId           String
+  journeyId          String
+  ruleCode           String
+  fingerprint        String?  @unique
+  status             String   @default("potential")
+  estimatedCostCents Int      @default(0)
+  evidence           Json
+  createdAt          DateTime @default(now())
+  tenant             Tenant   @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId, createdAt])
+}
