@@ -1,4 +1,3 @@
-import 'server-only';
 
 export type AuditFinding = {
   id: string;
