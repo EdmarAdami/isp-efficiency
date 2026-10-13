@@ -29,6 +29,7 @@ model Customer {
 }
 
 model Interaction {
+  externalId  String?
   id          String   @id @default(uuid())
   tenantId    String
   customerId  String
@@ -41,6 +42,7 @@ model Interaction {
   tenant      Tenant   @relation(fields: [tenantId], references: [id])
   customer    Customer @relation(fields: [customerId], references: [id])
 
+  @@unique([tenantId, externalId])
   @@index([tenantId, journeyId, occurredAt])
 }
 
