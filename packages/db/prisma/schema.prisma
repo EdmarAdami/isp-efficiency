@@ -63,6 +63,7 @@ model Finding {
   tenantId           String
   journeyId          String
   ruleCode           String
+  fingerprint        String?  @unique
   status             String   @default("potential")
   estimatedCostCents Int      @default(0)
   evidence           Json
