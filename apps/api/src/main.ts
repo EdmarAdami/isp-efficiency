@@ -1,6 +1,8 @@
 import 'reflect-metadata';
 import { NestFactory } from '@nestjs/core';
 import { Module, Controller, Get } from '@nestjs/common';
+import { AuditController } from './audits/audit.controller';
+import { AuditService } from './audits/audit.service';
 import { demoAudit } from './rules/audit';
 import { detectExcessiveTransfers } from './rules/quality';
 
@@ -13,7 +15,7 @@ import { detectExcessiveTransfers } from './rules/quality';
     ]) };
   }
 }
-@Module({ controllers: [ApiController] }) class AppModule {}
+@Module({ controllers: [ApiController, AuditController], providers: [AuditService] }) class AppModule {}
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   app.enableCors({ origin: process.env.WEB_ORIGIN || 'http://localhost:3000' });
