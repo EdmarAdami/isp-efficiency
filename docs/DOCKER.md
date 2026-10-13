@@ -44,3 +44,18 @@ Para outro host, informe apenas endereço/alias SSH, usuário, porta e caminho d
 A auditoria de dependências identificou vulnerabilidades que exigem atualizar versões principais ou revisar dependências transitivas. Esta implantação é restrita a localhost; a liberação pública permanece pendente dessa revisão e de validação do login real.
 
 Referências: [Next.js standalone](https://nextjs.org/docs/app/api-reference/config/next-config-js/output), [ordem de inicialização do Compose](https://docs.docker.com/compose/how-tos/startup-order/).
+
+## Login local sem Microsoft
+
+Uma conta administrativa por instalação pode entrar com usuário e senha sem Entra. O serviço armazena somente hash PBKDF2-SHA256 com sal aleatório e 600.000 iterações. Para escolher uma senha, execute em terminal privado:
+
+```sh
+python3 scripts/configure-local-login.py --user admin
+docker compose --env-file .env.docker -f compose.production.yml up --build -d --wait web
+```
+
+O prompt oculta a senha. Para gerar uma senha aleatória, adicione `--generate`; ela será salva apenas em `.local-login` (permissões 0600, ignorado no Git). Guarde em gerenciador de senhas e remova esse arquivo após salvar. Não envie senhas no chat.
+
+Abra `/login`, entre e o sistema direcionará ao dashboard. Há limite de cinco tentativas por quinze minutos, compartilhado pelo administrador deste processo. Essa proteção pressupõe uma única instância local; antes de usar réplicas, implemente limitador persistido em Redis. A sessão dura oito horas. Trocar a senha invalida sessões locais após recriar o serviço. Para desativar o login local, remova `LOCAL_AUTH_USER` e `LOCAL_AUTH_PASSWORD_HASH` e recrie o web. Não há cadastro aberto nem recuperação de senha por e-mail. O login Microsoft continua disponível quando configurado.
+
+Referência: [Credentials no Auth.js](https://authjs.dev/getting-started/authentication/credentials).

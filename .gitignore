@@ -8,3 +8,5 @@ dist/
 .env.*
 !.env.example
 !.env.docker.example
+
+.local-login

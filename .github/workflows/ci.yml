@@ -17,6 +17,7 @@ jobs:
         env:
           DATABASE_URL: postgresql://isp:dummy@localhost:5432/isp_efficiency
       - run: npm run build -w @isp/api
+      - run: npx tsx --test apps/web/lib/local-auth.test.ts
       - run: npm run build -w @isp/web
       - run: npx prisma validate --schema packages/db/prisma/schema.prisma
         env:
@@ -27,7 +28,9 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - run: python3 scripts/init-docker-env.py
+      - run: python3 scripts/configure-local-login.py --generate
       - run: docker compose --env-file .env.docker -f compose.production.yml up --build -d --wait
       - run: docker compose --env-file .env.docker -f compose.production.yml exec -T web node < scripts/smoke.cjs
+      - run: python3 scripts/test-local-login.py --url http://localhost:3000
       - if: always()
         run: docker compose --env-file .env.docker -f compose.production.yml down
